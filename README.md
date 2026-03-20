@@ -67,34 +67,54 @@ User                   PrivacyLayer SDK               Soroban Contract
 PrivacyLayer/
 ├── circuits/              # ZK circuits written in Noir
 │   ├── commitment/        # Commitment scheme (Poseidon)
+│   │   └── src/main.nr
 │   ├── withdraw/          # Withdrawal proof (Merkle + nullifier)
-│   └── merkle/            # Shared Merkle utilities
+│   │   └── src/main.nr
+│   ├── merkle/            # Merkle tree circuit library
+│   │   └── src/lib.nr
+│   ├── lib/               # Shared circuit utilities
+│   │   └── src/
+│   │       ├── hash/      # Hash functions
+│   │       ├── merkle/    # Merkle utilities
+│   │       └── validation/# Input validation
+│   └── integration_test.nr
 ├── contracts/             # Soroban smart contracts (Rust)
 │   └── privacy_pool/
 │       └── src/
-│           ├── lib.rs     # Main contract (deposit, withdraw)
-│           ├── merkle.rs  # Incremental Merkle tree (depth=20)
-│           ├── verifier.rs# Groth16 verifier via BN254 host fns
-│           ├── state.rs   # Contract state types
-│           ├── events.rs  # Contract events
-│           ├── errors.rs  # Error types
-│           └── test.rs    # Integration tests
-├── sdk/                   # TypeScript client SDK
+│           ├── contract.rs        # Main contract interface
+│           ├── lib.rs             # Library entry point
+│           ├── core/              # Core business logic
+│           │   ├── deposit.rs     # Deposit operations
+│           │   ├── withdraw.rs    # Withdrawal operations
+│           │   ├── admin.rs       # Admin functions
+│           │   ├── initialize.rs  # Contract initialization
+│           │   └── view.rs        # View/query functions
+│           ├── crypto/            # Cryptographic operations
+│           │   ├── merkle.rs      # Incremental Merkle tree (depth=20)
+│           │   └── verifier.rs    # Groth16 verifier via BN254 host fns
+│           ├── storage/           # State management
+│           │   ├── config.rs      # Configuration storage
+│           │   └── nullifier.rs   # Nullifier tracking
+│           ├── types/             # Type definitions
+│           │   ├── state.rs       # Contract state types
+│           │   ├── events.rs      # Contract events
+│           │   └── errors.rs      # Error types
+│           ├── utils/             # Utility functions
+│           │   ├── validation.rs  # Input validation
+│           │   └── address_decoder.rs
+│           ├── test.rs            # Unit tests
+│           └── integration_test.rs# Integration tests
+├── sdk/                   # TypeScript client SDK (planned)
 │   └── src/
 │       ├── note.ts        # Note generation
 │       ├── deposit.ts     # Deposit flow
 │       ├── withdraw.ts    # Withdraw flow (proof generation)
 │       ├── merkle.ts      # Client-side Merkle sync
 │       └── __tests__/     # Jest tests
-├── frontend/              # Next.js dApp (Freighter wallet)
-├── scripts/               # Deploy + key setup
-├── docs/
-│   ├── architecture.md
-│   ├── protocol-spec.md
-│   └── threat-model.md
-├── FOUNDATION.md          # Project spec and roadmap
-├── ISSUES.md              # Full 100-issue list for Drips Wave
-└── CONTRIBUTING.md
+├── frontend/              # Next.js dApp (planned)
+├── scripts/               # Deploy + key setup (planned)
+├── contracts/privacy_pool/ARCHITECTURE.md  # Contract architecture docs
+└── docs/                  # Documentation (planned)
 ```
 
 ---
@@ -122,9 +142,16 @@ noirup
 ### Build Circuits
 
 ```bash
-cd circuits
-nargo build       # Compile all circuits
+cd circuits/commitment
+nargo build       # Compile commitment circuit
 nargo test        # Run circuit tests
+
+cd ../withdraw
+nargo build       # Compile withdrawal circuit
+nargo test
+
+cd ../merkle
+nargo build       # Compile merkle library
 ```
 
 ### Build Contracts
@@ -132,24 +159,31 @@ nargo test        # Run circuit tests
 ```bash
 cd contracts
 cargo build --target wasm32-unknown-unknown --release
-cargo test        # Run unit tests
+cargo test        # Run unit and integration tests
 ```
 
-### Build SDK
+## Current Status
 
-```bash
-cd sdk
-npm install
-npm run build
-npm test          # Run Jest tests
-```
+✅ Circuits: Commitment, withdrawal, and merkle circuits implemented  
+✅ Contracts: Full privacy pool contract with deposit/withdraw/admin functions  
+🚧 SDK: TypeScript client SDK (planned)  
+🚧 Frontend: Next.js dApp (planned)  
+🚧 Scripts: Deployment automation (planned)
 
-### Deploy to Testnet
+---
 
-```bash
-chmod +x scripts/deploy.sh
-./scripts/deploy.sh --network testnet
-```
+## Roadmap & Issues
+
+We're tracking development through GitHub Issues. Key areas:
+
+- **Circuits**: Optimization, additional proof types, circuit auditing
+- **Contracts**: Gas optimization, additional admin features, testnet deployment
+- **SDK**: TypeScript/JavaScript client library for note generation and proof creation
+- **Frontend**: Web interface with Freighter wallet integration
+- **Documentation**: Architecture docs, API references, tutorials
+- **Testing**: Comprehensive test coverage, fuzzing, security audits
+
+Check the [Issues tab](https://github.com/ANAVHEOBA/PrivacyLayer/issues) for specific tasks and bounties.
 
 ---
 
@@ -165,7 +199,16 @@ See [`docs/threat-model.md`](docs/threat-model.md) for known risks.
 
 ## Contributing
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md). This project is funded via [Drips Wave](https://www.drips.network/wave) — contributors earn USDC for completing issues.
+We welcome contributions! Here's how to get started:
+
+1. Check the [Issues](https://github.com/ANAVHEOBA/PrivacyLayer/issues) tab for open tasks
+2. Comment on an issue to claim it
+3. Fork the repo and create a feature branch
+4. Submit a PR referencing the issue number
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for detailed guidelines.
+
+This project is funded via [Drips Wave](https://www.drips.network/wave) — contributors earn USDC for completing issues.
 
 ---
 
